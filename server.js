@@ -704,7 +704,7 @@ function obsHtml() {
 
     let lastEventSerial = null;
 
-    const PROMPT_EVERY_MS = 5 * 60 * 1000;
+    const PROMPT_EVERY_MS = 10000;
     const PROMPT_DURATION_MS = 5000;
 
     likeSound.volume = 0.85;
