@@ -1,6 +1,7 @@
 // server.js
 // Deal Duck Voice Likes OBS Widget
 // Railway-ready, no npm packages needed.
+// OBS Browser Source: Width 800, Height 600
 // Put taksi.mp3 next to this file.
 
 const http = require("http");
@@ -11,13 +12,13 @@ const path = require("path");
 const CONFIG = {
   PORT: Number(process.env.PORT || 3000),
 
-  // Твой Roblox PlaceId / UniverseId.
+  // Roblox PlaceId / UniverseId
   ROBLOX_ID: Number(process.env.ROBLOX_ID || 9901911212),
 
-  // Проверка лайков.
+  // Проверка лайков
   POLL_MS: Number(process.env.POLL_MS || 10000),
 
-  // Railway Volume: лучше поставить STATE_FILE=/data/likes-state.json
+  // На Railway лучше поставить STATE_FILE=/data/likes-state.json
   STATE_FILE: process.env.STATE_FILE || (
     fs.existsSync("/data") ? "/data/likes-state.json" : "./likes-state.json"
   ),
@@ -134,7 +135,6 @@ function getJson(url) {
 async function resolveGame() {
   if (state.universeId) return;
 
-  // 1) Пробуем ROBLOX_ID как PlaceId.
   try {
     const url =
       "https://games.roblox.com/v1/games/multiget-place-details?placeIds=" +
@@ -151,6 +151,7 @@ async function resolveGame() {
       console.log("[GAME] PlaceId:", state.placeId);
       console.log("[GAME] UniverseId:", state.universeId);
       console.log("[GAME] Name:", state.name);
+
       saveState();
       return;
     }
@@ -158,7 +159,6 @@ async function resolveGame() {
     console.log("[RESOLVE PLACE FAILED]", err.message);
   }
 
-  // 2) Пробуем ROBLOX_ID как UniverseId.
   try {
     const url =
       "https://games.roblox.com/v1/games?universeIds=" +
@@ -175,6 +175,7 @@ async function resolveGame() {
       console.log("[GAME] UniverseId:", state.universeId);
       console.log("[GAME] PlaceId:", state.placeId);
       console.log("[GAME] Name:", state.name);
+
       saveState();
       return;
     }
@@ -238,8 +239,6 @@ async function pollLikes() {
     state.error = null;
 
     if (firstSuccessfulPoll) {
-      // Первый запуск: старые лайки просто записываются как рекорд.
-      // Звук на старые лайки не играет.
       if (realLikes > state.recordLikes) {
         state.recordLikes = realLikes;
         state.shownLikes = realLikes;
@@ -257,7 +256,7 @@ async function pollLikes() {
     // Защита:
     // лайки вниз не идут;
     // снял лайк и вернул обратно — звука нет;
-    // звук только если лайки стали выше рекорда.
+    // звук и фейерверк только если лайки стали выше рекорда.
     if (realLikes > state.recordLikes) {
       state.recordLikes = realLikes;
       state.shownLikes = realLikes;
@@ -325,12 +324,13 @@ function obsHtml() {
   <title>Deal Duck Likes OBS</title>
   <style>
     :root {
-      --bg0: rgba(9, 10, 13, 0.90);
-      --bg1: rgba(28, 31, 36, 0.86);
+      --bg0: rgba(9, 10, 13, 0.91);
+      --bg1: rgba(28, 31, 36, 0.88);
       --line: rgba(255, 255, 255, 0.13);
       --text: #f5f7fb;
       --muted: rgba(245, 247, 251, 0.58);
       --gold: #ffcc3d;
+      --gold2: #ff9f22;
       --green: #34d86d;
     }
 
@@ -344,18 +344,42 @@ function obsHtml() {
       font-family: "Builder Sans", "Gotham SSm", "Segoe UI", Arial, sans-serif;
     }
 
-    .promptWrap {
+    .fireworks {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .widgetStack {
       position: absolute;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-16px);
+      right: 44px;
+      bottom: 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+      z-index: 20;
+    }
+
+    .promptWrap {
+      align-self: flex-end;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 7px;
+      gap: 5px;
+      margin-right: 74px;
       opacity: 0;
+      transform: translateY(14px) scale(0.96);
       pointer-events: none;
-      z-index: 20;
     }
 
     .promptWrap.show {
@@ -367,7 +391,7 @@ function obsHtml() {
       border-radius: 999px;
       background:
         radial-gradient(circle at 20% 0%, rgba(255,255,255,0.16), transparent 42%),
-        linear-gradient(135deg, rgba(32,35,42,0.92), rgba(10,11,15,0.92));
+        linear-gradient(135deg, rgba(34,37,44,0.94), rgba(10,11,15,0.94));
       border: 1px solid rgba(255,255,255,0.16);
       box-shadow:
         0 12px 36px rgba(0,0,0,0.42),
@@ -384,7 +408,7 @@ function obsHtml() {
       color: var(--gold);
       text-shadow:
         0 2px 10px rgba(0,0,0,0.65),
-        0 0 14px rgba(255,204,61,0.32);
+        0 0 14px rgba(255,204,61,0.34);
     }
 
     .promptArrow {
@@ -393,14 +417,8 @@ function obsHtml() {
       color: var(--gold);
       text-shadow:
         0 4px 16px rgba(0,0,0,0.85),
-        0 0 18px rgba(255,204,61,0.48);
+        0 0 18px rgba(255,204,61,0.52);
       animation: arrowBlink 1s ease-in-out infinite;
-    }
-
-    .safe {
-      position: absolute;
-      right: 26px;
-      bottom: 26px;
     }
 
     .card {
@@ -408,9 +426,9 @@ function obsHtml() {
       display: inline-flex;
       align-items: center;
       gap: 13px;
-      max-width: 560px;
-      padding: 10px 12px;
-      border-radius: 20px;
+      max-width: 580px;
+      padding: 11px 13px;
+      border-radius: 21px;
       background:
         radial-gradient(circle at 16% 0%, rgba(255,255,255,0.12), transparent 35%),
         linear-gradient(135deg, var(--bg1), var(--bg0) 58%, rgba(5,6,9,0.94));
@@ -428,7 +446,7 @@ function obsHtml() {
       content: "";
       position: absolute;
       inset: 1px;
-      border-radius: 19px;
+      border-radius: 20px;
       border: 1px solid rgba(255,255,255,0.055);
       pointer-events: none;
     }
@@ -447,10 +465,10 @@ function obsHtml() {
 
     .iconBox {
       position: relative;
-      width: 48px;
-      height: 48px;
-      flex: 0 0 48px;
-      border-radius: 16px;
+      width: 50px;
+      height: 50px;
+      flex: 0 0 50px;
+      border-radius: 17px;
       display: grid;
       place-items: center;
       background:
@@ -465,7 +483,7 @@ function obsHtml() {
     }
 
     .icon {
-      font-size: 29px;
+      font-size: 30px;
       transform: translateY(-1px);
       filter:
         drop-shadow(0 4px 8px rgba(0,0,0,0.42))
@@ -474,12 +492,12 @@ function obsHtml() {
 
     .main {
       min-width: 0;
-      width: 285px;
+      width: 300px;
       z-index: 2;
     }
 
     .title {
-      font-size: 20px;
+      font-size: 21px;
       font-weight: 850;
       letter-spacing: -0.3px;
       line-height: 1.05;
@@ -511,7 +529,7 @@ function obsHtml() {
 
     .divider {
       width: 1px;
-      height: 46px;
+      height: 48px;
       flex: 0 0 1px;
       background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.18), transparent);
       z-index: 2;
@@ -521,18 +539,18 @@ function obsHtml() {
       display: flex;
       align-items: center;
       gap: 9px;
-      padding: 7px 11px 7px 10px;
-      border-radius: 16px;
+      padding: 8px 12px 8px 10px;
+      border-radius: 17px;
       background: linear-gradient(145deg, rgba(0,0,0,0.18), rgba(255,255,255,0.055));
       border: 1px solid rgba(255,255,255,0.08);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-      min-width: 116px;
+      min-width: 122px;
       justify-content: flex-end;
       z-index: 2;
     }
 
     .miniLike {
-      font-size: 23px;
+      font-size: 24px;
       filter: drop-shadow(0 0 9px rgba(255,196,47,0.35));
     }
 
@@ -544,7 +562,7 @@ function obsHtml() {
     }
 
     .likes {
-      font-size: 32px;
+      font-size: 33px;
       font-weight: 950;
       letter-spacing: -1px;
       color: #ffffff;
@@ -567,8 +585,8 @@ function obsHtml() {
       opacity: 0;
       pointer-events: none;
       background:
-        radial-gradient(circle at 80% 50%, rgba(255,204,67,0.26), transparent 34%),
-        linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.16) 45%, transparent 62%);
+        radial-gradient(circle at 80% 50%, rgba(255,204,67,0.28), transparent 34%),
+        linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.18) 45%, transparent 62%);
       z-index: 1;
     }
 
@@ -584,68 +602,90 @@ function obsHtml() {
     }
 
     .card.pulse {
-      animation: pop 0.8s cubic-bezier(.2,.8,.2,1);
+      animation: pop 0.85s cubic-bezier(.2,.8,.2,1);
     }
 
     .shine.play {
-      animation: shine 1.05s ease;
+      animation: shine 1.15s ease;
     }
 
     .card.pulse .iconBox {
-      animation: iconPop 0.8s cubic-bezier(.2,.8,.2,1);
+      animation: iconPop 0.85s cubic-bezier(.2,.8,.2,1);
     }
 
     .card.pulse .likes {
-      animation: numberPop 0.8s cubic-bezier(.2,.8,.2,1);
+      animation: numberPop 0.85s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .card.pulse .stat {
+      animation: statGlow 1.05s ease;
     }
 
     @keyframes promptInOut {
       0% {
         opacity: 0;
-        transform: translateX(-50%) translateY(-16px) scale(0.96);
+        transform: translateY(14px) scale(0.96);
       }
       13% {
         opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
+        transform: translateY(0) scale(1);
       }
       78% {
         opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
+        transform: translateY(0) scale(1);
       }
       100% {
         opacity: 0;
-        transform: translateX(-50%) translateY(-12px) scale(0.97);
+        transform: translateY(12px) scale(0.97);
       }
     }
 
     @keyframes arrowBlink {
       0%, 100% {
-        opacity: 0.38;
+        opacity: 0.36;
         transform: translateY(-2px);
       }
       50% {
         opacity: 1;
-        transform: translateY(7px);
+        transform: translateY(8px);
       }
     }
 
     @keyframes pop {
       0% { transform: scale(1); }
-      25% { transform: scale(1.045); }
+      24% { transform: scale(1.055); }
       55% { transform: scale(0.992); }
       100% { transform: scale(1); }
     }
 
     @keyframes iconPop {
       0% { transform: scale(1) rotate(0deg); }
-      35% { transform: scale(1.13) rotate(-4deg); }
+      35% { transform: scale(1.17) rotate(-5deg); }
       100% { transform: scale(1) rotate(0deg); }
     }
 
     @keyframes numberPop {
-      0% { transform: translateY(0); }
-      35% { transform: translateY(-3px); }
-      100% { transform: translateY(0); }
+      0% { transform: translateY(0) scale(1); }
+      35% { transform: translateY(-4px) scale(1.08); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    @keyframes statGlow {
+      0% {
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.08),
+          0 0 0 rgba(255,204,61,0);
+      }
+      35% {
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.12),
+          0 0 35px rgba(255,204,61,0.34);
+      }
+      100% {
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.08),
+          0 0 0 rgba(255,204,61,0);
+      }
     }
 
     @keyframes shine {
@@ -656,38 +696,42 @@ function obsHtml() {
   </style>
 </head>
 <body>
-  <div class="promptWrap" id="promptWrap">
-    <div class="promptText">Поставь <span class="gold">лайк</span>, будет сюрприз</div>
-    <div class="promptArrow">↓</div>
-  </div>
+  <canvas class="fireworks" id="fireworks"></canvas>
 
-  <div class="safe">
-    <div class="card" id="card">
-      <div class="shine" id="shine"></div>
-
-      <div class="iconBox">
-        <div class="icon">👍</div>
+  <div class="stage">
+    <div class="widgetStack">
+      <div class="promptWrap" id="promptWrap">
+        <div class="promptText">Поставь <span class="gold">лайк</span>, будет сюрприз</div>
+        <div class="promptArrow">↓</div>
       </div>
 
-      <div class="main">
-        <div class="title" id="gameName">Deal Duck Voice [BETA]</div>
-        <div class="sub">
-          <span class="dot"></span>
-          <span>живой счётчик лайков</span>
+      <div class="card" id="card">
+        <div class="shine" id="shine"></div>
+
+        <div class="iconBox">
+          <div class="icon">👍</div>
         </div>
-      </div>
 
-      <div class="divider"></div>
-
-      <div class="stat">
-        <div class="miniLike">👍</div>
-        <div class="numWrap">
-          <div class="likes" id="likes">0</div>
-          <div class="label">лайков режима</div>
+        <div class="main">
+          <div class="title" id="gameName">Deal Duck Voice [BETA]</div>
+          <div class="sub">
+            <span class="dot"></span>
+            <span>живой счётчик лайков</span>
+          </div>
         </div>
-      </div>
 
-      <div class="error" id="errorBox">Ошибка обновления</div>
+        <div class="divider"></div>
+
+        <div class="stat" id="statBox">
+          <div class="miniLike">👍</div>
+          <div class="numWrap">
+            <div class="likes" id="likes">0</div>
+            <div class="label">лайков режима</div>
+          </div>
+        </div>
+
+        <div class="error" id="errorBox">Ошибка обновления</div>
+      </div>
     </div>
   </div>
 
@@ -696,15 +740,20 @@ function obsHtml() {
   <script>
     const card = document.getElementById("card");
     const shine = document.getElementById("shine");
+    const statBox = document.getElementById("statBox");
     const gameName = document.getElementById("gameName");
     const likes = document.getElementById("likes");
     const errorBox = document.getElementById("errorBox");
     const likeSound = document.getElementById("likeSound");
     const promptWrap = document.getElementById("promptWrap");
+    const canvas = document.getElementById("fireworks");
+    const ctx = canvas.getContext("2d");
 
     let lastEventSerial = null;
+    let particles = [];
+    let fireworkRunning = false;
 
-    const PROMPT_EVERY_MS = 10000;
+    const PROMPT_EVERY_MS = 5 * 60 * 1000;
     const PROMPT_DURATION_MS = 5000;
 
     likeSound.volume = 0.85;
@@ -712,6 +761,18 @@ function obsHtml() {
     function formatNumber(n) {
       return Number(n || 0).toLocaleString("ru-RU");
     }
+
+    function resizeCanvas() {
+      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
 
     function playLikeSound() {
       try {
@@ -726,6 +787,121 @@ function obsHtml() {
       } catch (err) {}
     }
 
+    function rand(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    function createBurst(x, y, count, power) {
+      const colors = [
+        "#ffcc3d",
+        "#fff4a8",
+        "#ff8a2a",
+        "#ffffff",
+        "#7dfcff",
+        "#b68cff"
+      ];
+
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = rand(power * 0.45, power);
+        const size = rand(2.2, 4.8);
+
+        particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: rand(0.85, 1.25),
+          maxLife: 1.25,
+          size: size,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          gravity: rand(0.028, 0.055),
+          spin: rand(-0.15, 0.15)
+        });
+      }
+    }
+
+    function createSparkRain(x, y, count) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: x + rand(-90, 90),
+          y: y + rand(-25, 25),
+          vx: rand(-1.4, 1.4),
+          vy: rand(-4.2, -1.2),
+          life: rand(0.75, 1.15),
+          maxLife: 1.15,
+          size: rand(1.6, 3.8),
+          color: Math.random() > 0.5 ? "#ffcc3d" : "#ffffff",
+          gravity: rand(0.04, 0.07),
+          spin: rand(-0.15, 0.15)
+        });
+      }
+    }
+
+    function startFireworks() {
+      resizeCanvas();
+
+      const statRect = statBox.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+
+      const cx = statRect.left + statRect.width * 0.5;
+      const cy = statRect.top + statRect.height * 0.5;
+
+      createBurst(cx, cy, 52, 5.6);
+      createBurst(cardRect.left + 70, cardRect.top + 14, 30, 4.4);
+      createBurst(cardRect.right - 42, cardRect.top + 8, 34, 4.7);
+      createSparkRain(cx, cy - 18, 36);
+
+      if (!fireworkRunning) {
+        fireworkRunning = true;
+        requestAnimationFrame(tickFireworks);
+      }
+    }
+
+    function tickFireworks() {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      const dt = 0.016;
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+
+        p.life -= dt;
+        p.vy += p.gravity;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.985;
+        p.vy *= 0.985;
+
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        const alpha = Math.max(0, p.life / p.maxLife);
+        const r = p.size * (0.75 + alpha * 0.55);
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 13;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      if (particles.length > 0) {
+        requestAnimationFrame(tickFireworks);
+      } else {
+        fireworkRunning = false;
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      }
+    }
+
     function playEffect() {
       card.classList.remove("pulse");
       shine.classList.remove("play");
@@ -737,6 +913,7 @@ function obsHtml() {
       shine.classList.add("play");
 
       playLikeSound();
+      startFireworks();
     }
 
     function showPrompt() {
@@ -746,7 +923,7 @@ function obsHtml() {
 
       setTimeout(function() {
         promptWrap.classList.remove("show");
-      }, PROMPT_DURATION_MS + 100);
+      }, PROMPT_DURATION_MS + 120);
     }
 
     async function update() {
