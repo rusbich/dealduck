@@ -344,6 +344,59 @@ function obsHtml() {
       font-family: "Builder Sans", "Gotham SSm", "Segoe UI", Arial, sans-serif;
     }
 
+    .promptWrap {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-16px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .promptWrap.show {
+      animation: promptInOut 5s ease-in-out forwards;
+    }
+
+    .promptText {
+      padding: 9px 16px 10px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(255,255,255,0.16), transparent 42%),
+        linear-gradient(135deg, rgba(32,35,42,0.92), rgba(10,11,15,0.92));
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow:
+        0 12px 36px rgba(0,0,0,0.42),
+        inset 0 1px 0 rgba(255,255,255,0.14);
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.25px;
+      white-space: nowrap;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.65);
+    }
+
+    .promptText .gold {
+      color: var(--gold);
+      text-shadow:
+        0 2px 10px rgba(0,0,0,0.65),
+        0 0 14px rgba(255,204,61,0.32);
+    }
+
+    .promptArrow {
+      font-size: 34px;
+      line-height: 1;
+      color: var(--gold);
+      text-shadow:
+        0 4px 16px rgba(0,0,0,0.85),
+        0 0 18px rgba(255,204,61,0.48);
+      animation: arrowBlink 1s ease-in-out infinite;
+    }
+
     .safe {
       position: absolute;
       right: 26px;
@@ -546,6 +599,36 @@ function obsHtml() {
       animation: numberPop 0.8s cubic-bezier(.2,.8,.2,1);
     }
 
+    @keyframes promptInOut {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-16px) scale(0.96);
+      }
+      13% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+      }
+      78% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-12px) scale(0.97);
+      }
+    }
+
+    @keyframes arrowBlink {
+      0%, 100% {
+        opacity: 0.38;
+        transform: translateY(-2px);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(7px);
+      }
+    }
+
     @keyframes pop {
       0% { transform: scale(1); }
       25% { transform: scale(1.045); }
@@ -573,6 +656,11 @@ function obsHtml() {
   </style>
 </head>
 <body>
+  <div class="promptWrap" id="promptWrap">
+    <div class="promptText">Поставь <span class="gold">лайк</span>, будет сюрприз</div>
+    <div class="promptArrow">↓</div>
+  </div>
+
   <div class="safe">
     <div class="card" id="card">
       <div class="shine" id="shine"></div>
@@ -612,8 +700,12 @@ function obsHtml() {
     const likes = document.getElementById("likes");
     const errorBox = document.getElementById("errorBox");
     const likeSound = document.getElementById("likeSound");
+    const promptWrap = document.getElementById("promptWrap");
 
     let lastEventSerial = null;
+
+    const PROMPT_EVERY_MS = 5 * 60 * 1000;
+    const PROMPT_DURATION_MS = 5000;
 
     likeSound.volume = 0.85;
 
@@ -645,6 +737,16 @@ function obsHtml() {
       shine.classList.add("play");
 
       playLikeSound();
+    }
+
+    function showPrompt() {
+      promptWrap.classList.remove("show");
+      void promptWrap.offsetWidth;
+      promptWrap.classList.add("show");
+
+      setTimeout(function() {
+        promptWrap.classList.remove("show");
+      }, PROMPT_DURATION_MS + 100);
     }
 
     async function update() {
@@ -685,6 +787,8 @@ function obsHtml() {
 
     update();
     setInterval(update, 2000);
+
+    setInterval(showPrompt, PROMPT_EVERY_MS);
   </script>
 </body>
 </html>`;
