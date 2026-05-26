@@ -25,7 +25,7 @@ const CONFIG = {
 
   SOUND_FILE: process.env.SOUND_FILE || "./taksi.mp3",
 
-  DEFAULT_GAME_NAME: "Deal Duck Voice [BETA]"
+  DEFAULT_GAME_NAME: "Deal Duck Voice"
 };
 
 let state = {
@@ -45,6 +45,12 @@ let state = {
 
 let firstSuccessfulPoll = true;
 
+function cleanGameName(name) {
+  const raw = String(name || CONFIG.DEFAULT_GAME_NAME);
+  const cleaned = raw.replace(/\s*\[BETA\]\s*/gi, "").trim();
+  return cleaned || CONFIG.DEFAULT_GAME_NAME;
+}
+
 function loadSavedState() {
   try {
     if (!fs.existsSync(CONFIG.STATE_FILE)) return;
@@ -53,7 +59,7 @@ function loadSavedState() {
 
     if (typeof data.placeId === "number") state.placeId = data.placeId;
     if (typeof data.universeId === "number") state.universeId = data.universeId;
-    if (typeof data.name === "string" && data.name.length > 0) state.name = data.name;
+    if (typeof data.name === "string" && data.name.length > 0) state.name = cleanGameName(data.name);
     if (typeof data.realLikes === "number") state.realLikes = data.realLikes;
     if (typeof data.shownLikes === "number") state.shownLikes = data.shownLikes;
     if (typeof data.recordLikes === "number") state.recordLikes = data.recordLikes;
@@ -77,7 +83,7 @@ function saveState() {
         {
           placeId: state.placeId,
           universeId: state.universeId,
-          name: state.name,
+          name: cleanGameName(state.name),
           realLikes: state.realLikes,
           shownLikes: state.shownLikes,
           recordLikes: state.recordLikes,
@@ -147,7 +153,7 @@ async function resolveGame() {
     if (item && item.universeId) {
       state.placeId = Number(item.placeId || CONFIG.ROBLOX_ID);
       state.universeId = Number(item.universeId);
-      state.name = String(item.name || state.name);
+      state.name = CONFIG.DEFAULT_GAME_NAME;
 
       console.log("[GAME] PlaceId:", state.placeId);
       console.log("[GAME] UniverseId:", state.universeId);
@@ -172,7 +178,7 @@ async function resolveGame() {
     if (item && item.id) {
       state.universeId = Number(item.id);
       state.placeId = Number(item.rootPlaceId || CONFIG.ROBLOX_ID);
-      state.name = String(item.name || state.name);
+      state.name = CONFIG.DEFAULT_GAME_NAME;
 
       console.log("[GAME] UniverseId:", state.universeId);
       console.log("[GAME] PlaceId:", state.placeId);
@@ -199,7 +205,7 @@ async function updateGameInfo() {
   const item = data && Array.isArray(data.data) ? data.data[0] : null;
 
   if (item) {
-    state.name = String(item.name || state.name);
+    state.name = CONFIG.DEFAULT_GAME_NAME;
     state.placeId = Number(item.rootPlaceId || state.placeId);
   }
 }
@@ -239,6 +245,7 @@ async function pollLikes() {
     state.lastCheckAt = Date.now();
     state.ready = true;
     state.error = null;
+    state.name = CONFIG.DEFAULT_GAME_NAME;
 
     if (firstSuccessfulPoll) {
       // Первый запуск: старые лайки записываются как рекорд.
@@ -362,7 +369,6 @@ function obsHtml() {
       height: 100vh;
     }
 
-    /* OBS 800x600 */
     .widgetStack {
       position: absolute;
       right: 14px;
@@ -556,7 +562,7 @@ function obsHtml() {
     .stat {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 14px;
       padding: 12px 17px 12px 15px;
       border-radius: 23px;
       background:
@@ -567,38 +573,26 @@ function obsHtml() {
         inset 0 1px 0 rgba(255,255,255,0.09),
         0 0 0 rgba(255,204,61,0);
       min-width: 220px;
-      justify-content: flex-end;
+      justify-content: center;
       z-index: 2;
     }
 
     .miniLike {
-      font-size: 42px;
-      filter: drop-shadow(0 0 13px rgba(255,196,47,0.42));
-    }
-
-    .numWrap {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
+      font-size: 34px;
       line-height: 1;
+      filter: drop-shadow(0 0 11px rgba(255,196,47,0.42));
+      transform: translateY(1px);
     }
 
     .likes {
-      font-size: 68px;
+      font-size: 72px;
+      line-height: 0.95;
       font-weight: 1000;
       letter-spacing: -2.5px;
       color: #ffffff;
       text-shadow:
         0 3px 0 rgba(0,0,0,0.36),
         0 7px 20px rgba(0,0,0,0.68);
-    }
-
-    .label {
-      margin-top: 7px;
-      color: rgba(245,247,251,0.58);
-      font-size: 14px;
-      font-weight: 850;
-      white-space: nowrap;
     }
 
     .shine {
@@ -735,7 +729,7 @@ function obsHtml() {
         </div>
 
         <div class="main">
-          <div class="title" id="gameName">Deal Duck Voice [BETA]</div>
+          <div class="title" id="gameName">Deal Duck Voice</div>
           <div class="sub">
             <span class="dot"></span>
             <span>живой счётчик лайков</span>
@@ -746,10 +740,7 @@ function obsHtml() {
 
         <div class="stat" id="statBox">
           <div class="miniLike">👍</div>
-          <div class="numWrap">
-            <div class="likes" id="likes">0</div>
-            <div class="label">лайков режима</div>
-          </div>
+          <div class="likes" id="likes">0</div>
         </div>
 
         <div class="error" id="errorBox">Ошибка обновления</div>
@@ -775,9 +766,8 @@ function obsHtml() {
     let particles = [];
     let fireworkRunning = false;
 
-    // Сейчас для теста каждые 10 секунд.
-    // После теста поменяй на: 5 * 60 * 1000
-    const PROMPT_EVERY_MS = 10000;
+    // Напоминалка каждые 5 минут
+    const PROMPT_EVERY_MS = 5 * 60 * 1000;
     const PROMPT_DURATION_MS = 5000;
 
     likeSound.volume = 0.85;
@@ -957,7 +947,7 @@ function obsHtml() {
 
         const s = data.state;
 
-        gameName.textContent = s.name || "Deal Duck Voice [BETA]";
+        gameName.textContent = "Deal Duck Voice";
         likes.textContent = formatNumber(s.shownLikes || 0);
 
         if (s.error) {
