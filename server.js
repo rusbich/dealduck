@@ -15,10 +15,10 @@ const CONFIG = {
   // Roblox PlaceId / UniverseId
   ROBLOX_ID: Number(process.env.ROBLOX_ID || 9901911212),
 
-  // Проверка лайков
+  // Проверка лайков Roblox
   POLL_MS: Number(process.env.POLL_MS || 10000),
 
-  // На Railway лучше поставить STATE_FILE=/data/likes-state.json
+  // Railway Volume: лучше поставить STATE_FILE=/data/likes-state.json
   STATE_FILE: process.env.STATE_FILE || (
     fs.existsSync("/data") ? "/data/likes-state.json" : "./likes-state.json"
   ),
@@ -135,6 +135,7 @@ function getJson(url) {
 async function resolveGame() {
   if (state.universeId) return;
 
+  // 1) Пробуем ROBLOX_ID как PlaceId
   try {
     const url =
       "https://games.roblox.com/v1/games/multiget-place-details?placeIds=" +
@@ -159,6 +160,7 @@ async function resolveGame() {
     console.log("[RESOLVE PLACE FAILED]", err.message);
   }
 
+  // 2) Пробуем ROBLOX_ID как UniverseId
   try {
     const url =
       "https://games.roblox.com/v1/games?universeIds=" +
@@ -239,6 +241,8 @@ async function pollLikes() {
     state.error = null;
 
     if (firstSuccessfulPoll) {
+      // Первый запуск: старые лайки записываются как рекорд.
+      // Звук и фейерверки на старые лайки не играют.
       if (realLikes > state.recordLikes) {
         state.recordLikes = realLikes;
         state.shownLikes = realLikes;
@@ -324,13 +328,12 @@ function obsHtml() {
   <title>Deal Duck Likes OBS</title>
   <style>
     :root {
-      --bg0: rgba(9, 10, 13, 0.91);
-      --bg1: rgba(28, 31, 36, 0.88);
-      --line: rgba(255, 255, 255, 0.13);
+      --bg0: rgba(9, 10, 13, 0.92);
+      --bg1: rgba(30, 33, 39, 0.90);
+      --line: rgba(255, 255, 255, 0.15);
       --text: #f5f7fb;
-      --muted: rgba(245, 247, 251, 0.58);
+      --muted: rgba(245, 247, 251, 0.60);
       --gold: #ffcc3d;
-      --gold2: #ff9f22;
       --green: #34d86d;
     }
 
@@ -359,26 +362,26 @@ function obsHtml() {
       height: 100vh;
     }
 
-    /* Под OBS 800x600 */
+    /* OBS 800x600 */
     .widgetStack {
       position: absolute;
-      right: 58px;
-      bottom: 58px;
+      right: 14px;
+      bottom: 14px;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 22px;
+      gap: 20px;
       z-index: 20;
     }
 
-    /* Напоминалка теперь выше и ближе именно к счётчику */
     .promptWrap {
       align-self: flex-end;
+      width: 760px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
-      margin-right: 8px;
+      gap: 8px;
+      margin-right: 0;
       opacity: 0;
       transform: translateY(18px) scale(0.96);
       pointer-events: none;
@@ -389,38 +392,49 @@ function obsHtml() {
     }
 
     .promptText {
-      padding: 9px 16px 10px;
-      border-radius: 999px;
+      width: 760px;
+      box-sizing: border-box;
+      padding: 18px 24px 19px;
+      border-radius: 28px;
       background:
-        radial-gradient(circle at 20% 0%, rgba(255,255,255,0.17), transparent 42%),
-        linear-gradient(135deg, rgba(34,37,44,0.95), rgba(10,11,15,0.95));
-      border: 1px solid rgba(255,255,255,0.17);
+        radial-gradient(circle at 16% 0%, rgba(255,255,255,0.15), transparent 36%),
+        radial-gradient(circle at 78% 50%, rgba(255,204,61,0.16), transparent 38%),
+        linear-gradient(135deg, rgba(34,37,44,0.96), rgba(10,11,15,0.96));
+      border: 1px solid rgba(255,255,255,0.18);
       box-shadow:
-        0 13px 38px rgba(0,0,0,0.44),
-        0 0 22px rgba(255,204,61,0.08),
-        inset 0 1px 0 rgba(255,255,255,0.15);
+        0 18px 48px rgba(0,0,0,0.48),
+        0 0 34px rgba(255,204,61,0.13),
+        inset 0 1px 0 rgba(255,255,255,0.16),
+        inset 0 -1px 0 rgba(0,0,0,0.38);
       color: #ffffff;
-      font-size: 20px;
-      font-weight: 900;
-      letter-spacing: -0.25px;
+      font-size: 36px;
+      font-weight: 1000;
+      letter-spacing: -0.8px;
+      text-align: center;
       white-space: nowrap;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.65);
+      text-shadow:
+        0 3px 12px rgba(0,0,0,0.72),
+        0 0 18px rgba(255,255,255,0.08);
     }
 
     .promptText .gold {
       color: var(--gold);
       text-shadow:
-        0 2px 10px rgba(0,0,0,0.65),
-        0 0 14px rgba(255,204,61,0.36);
+        0 3px 12px rgba(0,0,0,0.72),
+        0 0 18px rgba(255,204,61,0.46);
     }
 
     .promptArrow {
-      font-size: 36px;
-      line-height: 1;
+      width: 760px;
+      text-align: center;
+      font-size: 82px;
+      font-weight: 1000;
+      line-height: 0.8;
       color: var(--gold);
       text-shadow:
-        0 4px 16px rgba(0,0,0,0.85),
-        0 0 20px rgba(255,204,61,0.58);
+        0 5px 20px rgba(0,0,0,0.9),
+        0 0 30px rgba(255,204,61,0.72),
+        0 0 60px rgba(255,204,61,0.22);
       animation: arrowBlink 1s ease-in-out infinite;
     }
 
@@ -428,18 +442,19 @@ function obsHtml() {
       position: relative;
       display: inline-flex;
       align-items: center;
-      gap: 14px;
-      max-width: 640px;
-      padding: 12px 14px;
-      border-radius: 22px;
+      gap: 18px;
+      width: 760px;
+      padding: 18px 20px;
+      box-sizing: border-box;
+      border-radius: 28px;
       background:
-        radial-gradient(circle at 16% 0%, rgba(255,255,255,0.13), transparent 35%),
-        linear-gradient(135deg, var(--bg1), var(--bg0) 58%, rgba(5,6,9,0.94));
+        radial-gradient(circle at 16% 0%, rgba(255,255,255,0.14), transparent 36%),
+        linear-gradient(135deg, var(--bg1), var(--bg0) 58%, rgba(5,6,9,0.95));
       border: 1px solid var(--line);
       box-shadow:
-        0 18px 48px rgba(0,0,0,0.46),
-        inset 0 1px 0 rgba(255,255,255,0.13),
-        inset 0 -1px 0 rgba(0,0,0,0.42);
+        0 22px 58px rgba(0,0,0,0.50),
+        inset 0 1px 0 rgba(255,255,255,0.14),
+        inset 0 -1px 0 rgba(0,0,0,0.45);
       color: var(--text);
       overflow: hidden;
       transform-origin: right bottom;
@@ -449,112 +464,116 @@ function obsHtml() {
       content: "";
       position: absolute;
       inset: 1px;
-      border-radius: 21px;
-      border: 1px solid rgba(255,255,255,0.055);
+      border-radius: 27px;
+      border: 1px solid rgba(255,255,255,0.06);
       pointer-events: none;
     }
 
     .card::after {
       content: "";
       position: absolute;
-      width: 210px;
-      height: 80px;
-      left: -62px;
-      top: -54px;
-      background: rgba(255,255,255,0.12);
-      filter: blur(34px);
+      width: 250px;
+      height: 100px;
+      left: -72px;
+      top: -68px;
+      background: rgba(255,255,255,0.13);
+      filter: blur(38px);
       pointer-events: none;
     }
 
     .iconBox {
       position: relative;
-      width: 54px;
-      height: 54px;
-      flex: 0 0 54px;
-      border-radius: 18px;
+      width: 76px;
+      height: 76px;
+      flex: 0 0 76px;
+      border-radius: 24px;
       display: grid;
       place-items: center;
       background:
-        radial-gradient(circle at 45% 28%, rgba(255, 220, 86, 0.36), transparent 45%),
-        linear-gradient(145deg, rgba(255,255,255,0.1), rgba(0,0,0,0.25));
-      border: 1px solid rgba(255, 210, 70, 0.3);
+        radial-gradient(circle at 45% 28%, rgba(255, 220, 86, 0.38), transparent 45%),
+        linear-gradient(145deg, rgba(255,255,255,0.11), rgba(0,0,0,0.27));
+      border: 1px solid rgba(255, 210, 70, 0.32);
       box-shadow:
-        0 9px 22px rgba(0,0,0,0.38),
-        0 0 24px rgba(255,190,40,0.17),
-        inset 0 1px 0 rgba(255,255,255,0.18);
+        0 12px 28px rgba(0,0,0,0.42),
+        0 0 30px rgba(255,190,40,0.20),
+        inset 0 1px 0 rgba(255,255,255,0.20);
       z-index: 2;
     }
 
     .icon {
-      font-size: 32px;
+      font-size: 46px;
       transform: translateY(-1px);
       filter:
-        drop-shadow(0 4px 8px rgba(0,0,0,0.42))
-        drop-shadow(0 0 9px rgba(255,190,42,0.36));
+        drop-shadow(0 5px 10px rgba(0,0,0,0.46))
+        drop-shadow(0 0 11px rgba(255,190,42,0.40));
     }
 
     .main {
       min-width: 0;
-      width: 325px;
+      width: 360px;
       z-index: 2;
     }
 
     .title {
-      font-size: 22px;
-      font-weight: 850;
-      letter-spacing: -0.35px;
+      font-size: 31px;
+      font-weight: 950;
+      letter-spacing: -0.55px;
       line-height: 1.05;
       color: var(--text);
-      text-shadow: 0 2px 10px rgba(0,0,0,0.62);
+      text-shadow: 0 3px 12px rgba(0,0,0,0.66);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .sub {
-      margin-top: 6px;
+      margin-top: 8px;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 9px;
       color: var(--muted);
-      font-size: 12.5px;
-      font-weight: 750;
+      font-size: 16px;
+      font-weight: 800;
       line-height: 1;
     }
 
     .dot {
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--green);
-      box-shadow: 0 0 10px rgba(52,216,109,0.8);
+      box-shadow: 0 0 12px rgba(52,216,109,0.85);
     }
 
     .divider {
       width: 1px;
-      height: 52px;
+      height: 74px;
       flex: 0 0 1px;
-      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.18), transparent);
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.22), transparent);
       z-index: 2;
     }
 
     .stat {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 9px 13px 9px 11px;
-      border-radius: 18px;
-      background: linear-gradient(145deg, rgba(0,0,0,0.19), rgba(255,255,255,0.06));
-      border: 1px solid rgba(255,255,255,0.085);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-      min-width: 134px;
+      gap: 15px;
+      padding: 12px 17px 12px 15px;
+      border-radius: 23px;
+      background:
+        radial-gradient(circle at 25% 15%, rgba(255,204,61,0.10), transparent 38%),
+        linear-gradient(145deg, rgba(0,0,0,0.21), rgba(255,255,255,0.065));
+      border: 1px solid rgba(255,255,255,0.095);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.09),
+        0 0 0 rgba(255,204,61,0);
+      min-width: 220px;
       justify-content: flex-end;
       z-index: 2;
     }
 
     .miniLike {
-      font-size: 26px;
-      filter: drop-shadow(0 0 10px rgba(255,196,47,0.38));
+      font-size: 42px;
+      filter: drop-shadow(0 0 13px rgba(255,196,47,0.42));
     }
 
     .numWrap {
@@ -565,20 +584,20 @@ function obsHtml() {
     }
 
     .likes {
-      font-size: 36px;
-      font-weight: 950;
-      letter-spacing: -1px;
+      font-size: 68px;
+      font-weight: 1000;
+      letter-spacing: -2.5px;
       color: #ffffff;
       text-shadow:
-        0 2px 0 rgba(0,0,0,0.35),
-        0 5px 16px rgba(0,0,0,0.62);
+        0 3px 0 rgba(0,0,0,0.36),
+        0 7px 20px rgba(0,0,0,0.68);
     }
 
     .label {
-      margin-top: 4px;
-      color: rgba(245,247,251,0.55);
-      font-size: 11px;
-      font-weight: 800;
+      margin-top: 7px;
+      color: rgba(245,247,251,0.58);
+      font-size: 14px;
+      font-weight: 850;
       white-space: nowrap;
     }
 
@@ -588,18 +607,18 @@ function obsHtml() {
       opacity: 0;
       pointer-events: none;
       background:
-        radial-gradient(circle at 80% 50%, rgba(255,204,67,0.3), transparent 34%),
-        linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.19) 45%, transparent 62%);
+        radial-gradient(circle at 80% 50%, rgba(255,204,67,0.34), transparent 34%),
+        linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.21) 45%, transparent 62%);
       z-index: 1;
     }
 
     .error {
       display: none;
       position: absolute;
-      right: 10px;
-      bottom: -18px;
-      font-size: 11px;
-      font-weight: 700;
+      right: 14px;
+      bottom: -20px;
+      font-size: 12px;
+      font-weight: 800;
       color: rgba(255,120,120,0.95);
       text-shadow: 0 2px 8px rgba(0,0,0,0.75);
     }
@@ -645,18 +664,18 @@ function obsHtml() {
 
     @keyframes arrowBlink {
       0%, 100% {
-        opacity: 0.34;
-        transform: translateY(-2px);
+        opacity: 0.35;
+        transform: translateY(-4px) scale(0.94);
       }
       50% {
         opacity: 1;
-        transform: translateY(9px);
+        transform: translateY(12px) scale(1.08);
       }
     }
 
     @keyframes pop {
       0% { transform: scale(1); }
-      24% { transform: scale(1.055); }
+      24% { transform: scale(1.035); }
       55% { transform: scale(0.992); }
       100% { transform: scale(1); }
     }
@@ -669,24 +688,24 @@ function obsHtml() {
 
     @keyframes numberPop {
       0% { transform: translateY(0) scale(1); }
-      35% { transform: translateY(-4px) scale(1.08); }
+      35% { transform: translateY(-5px) scale(1.08); }
       100% { transform: translateY(0) scale(1); }
     }
 
     @keyframes statGlow {
       0% {
         box-shadow:
-          inset 0 1px 0 rgba(255,255,255,0.08),
+          inset 0 1px 0 rgba(255,255,255,0.09),
           0 0 0 rgba(255,204,61,0);
       }
       35% {
         box-shadow:
-          inset 0 1px 0 rgba(255,255,255,0.12),
-          0 0 38px rgba(255,204,61,0.38);
+          inset 0 1px 0 rgba(255,255,255,0.14),
+          0 0 46px rgba(255,204,61,0.44);
       }
       100% {
         box-shadow:
-          inset 0 1px 0 rgba(255,255,255,0.08),
+          inset 0 1px 0 rgba(255,255,255,0.09),
           0 0 0 rgba(255,204,61,0);
       }
     }
@@ -756,7 +775,9 @@ function obsHtml() {
     let particles = [];
     let fireworkRunning = false;
 
-    const PROMPT_EVERY_MS = 5 * 60 * 1000;
+    // Сейчас для теста каждые 10 секунд.
+    // После теста поменяй на: 5 * 60 * 1000
+    const PROMPT_EVERY_MS = 10000;
     const PROMPT_DURATION_MS = 5000;
 
     likeSound.volume = 0.85;
@@ -807,7 +828,7 @@ function obsHtml() {
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = rand(power * 0.45, power);
-        const size = rand(2.2, 4.8);
+        const size = rand(2.3, 5.1);
 
         particles.push({
           x: x,
@@ -826,13 +847,13 @@ function obsHtml() {
     function createSparkRain(x, y, count) {
       for (let i = 0; i < count; i++) {
         particles.push({
-          x: x + rand(-90, 90),
-          y: y + rand(-25, 25),
-          vx: rand(-1.4, 1.4),
-          vy: rand(-4.2, -1.2),
+          x: x + rand(-110, 110),
+          y: y + rand(-30, 30),
+          vx: rand(-1.5, 1.5),
+          vy: rand(-4.4, -1.3),
           life: rand(0.75, 1.15),
           maxLife: 1.15,
-          size: rand(1.6, 3.8),
+          size: rand(1.8, 4.1),
           color: Math.random() > 0.5 ? "#ffcc3d" : "#ffffff",
           gravity: rand(0.04, 0.07)
         });
@@ -848,10 +869,10 @@ function obsHtml() {
       const cx = statRect.left + statRect.width * 0.5;
       const cy = statRect.top + statRect.height * 0.5;
 
-      createBurst(cx, cy, 58, 5.8);
-      createBurst(cardRect.left + 80, cardRect.top + 12, 34, 4.6);
-      createBurst(cardRect.right - 44, cardRect.top + 8, 38, 4.9);
-      createSparkRain(cx, cy - 22, 42);
+      createBurst(cx, cy, 70, 6.4);
+      createBurst(cardRect.left + 96, cardRect.top + 18, 40, 5.0);
+      createBurst(cardRect.right - 52, cardRect.top + 14, 44, 5.2);
+      createSparkRain(cx, cy - 28, 54);
 
       if (!fireworkRunning) {
         fireworkRunning = true;
@@ -886,7 +907,7 @@ function obsHtml() {
         ctx.globalAlpha = alpha;
         ctx.fillStyle = p.color;
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 14;
+        ctx.shadowBlur = 15;
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
