@@ -359,26 +359,28 @@ function obsHtml() {
       height: 100vh;
     }
 
+    /* Под OBS 800x600 */
     .widgetStack {
       position: absolute;
-      right: 44px;
-      bottom: 44px;
+      right: 58px;
+      bottom: 58px;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 12px;
+      gap: 22px;
       z-index: 20;
     }
 
+    /* Напоминалка теперь выше и ближе именно к счётчику */
     .promptWrap {
       align-self: flex-end;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 5px;
-      margin-right: 74px;
+      margin-right: 8px;
       opacity: 0;
-      transform: translateY(14px) scale(0.96);
+      transform: translateY(18px) scale(0.96);
       pointer-events: none;
     }
 
@@ -390,12 +392,13 @@ function obsHtml() {
       padding: 9px 16px 10px;
       border-radius: 999px;
       background:
-        radial-gradient(circle at 20% 0%, rgba(255,255,255,0.16), transparent 42%),
-        linear-gradient(135deg, rgba(34,37,44,0.94), rgba(10,11,15,0.94));
-      border: 1px solid rgba(255,255,255,0.16);
+        radial-gradient(circle at 20% 0%, rgba(255,255,255,0.17), transparent 42%),
+        linear-gradient(135deg, rgba(34,37,44,0.95), rgba(10,11,15,0.95));
+      border: 1px solid rgba(255,255,255,0.17);
       box-shadow:
-        0 12px 36px rgba(0,0,0,0.42),
-        inset 0 1px 0 rgba(255,255,255,0.14);
+        0 13px 38px rgba(0,0,0,0.44),
+        0 0 22px rgba(255,204,61,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.15);
       color: #ffffff;
       font-size: 20px;
       font-weight: 900;
@@ -408,16 +411,16 @@ function obsHtml() {
       color: var(--gold);
       text-shadow:
         0 2px 10px rgba(0,0,0,0.65),
-        0 0 14px rgba(255,204,61,0.34);
+        0 0 14px rgba(255,204,61,0.36);
     }
 
     .promptArrow {
-      font-size: 34px;
+      font-size: 36px;
       line-height: 1;
       color: var(--gold);
       text-shadow:
         0 4px 16px rgba(0,0,0,0.85),
-        0 0 18px rgba(255,204,61,0.52);
+        0 0 20px rgba(255,204,61,0.58);
       animation: arrowBlink 1s ease-in-out infinite;
     }
 
@@ -425,16 +428,16 @@ function obsHtml() {
       position: relative;
       display: inline-flex;
       align-items: center;
-      gap: 13px;
-      max-width: 580px;
-      padding: 11px 13px;
-      border-radius: 21px;
+      gap: 14px;
+      max-width: 640px;
+      padding: 12px 14px;
+      border-radius: 22px;
       background:
-        radial-gradient(circle at 16% 0%, rgba(255,255,255,0.12), transparent 35%),
+        radial-gradient(circle at 16% 0%, rgba(255,255,255,0.13), transparent 35%),
         linear-gradient(135deg, var(--bg1), var(--bg0) 58%, rgba(5,6,9,0.94));
       border: 1px solid var(--line);
       box-shadow:
-        0 16px 42px rgba(0,0,0,0.44),
+        0 18px 48px rgba(0,0,0,0.46),
         inset 0 1px 0 rgba(255,255,255,0.13),
         inset 0 -1px 0 rgba(0,0,0,0.42);
       color: var(--text);
@@ -446,7 +449,7 @@ function obsHtml() {
       content: "";
       position: absolute;
       inset: 1px;
-      border-radius: 20px;
+      border-radius: 21px;
       border: 1px solid rgba(255,255,255,0.055);
       pointer-events: none;
     }
@@ -454,52 +457,52 @@ function obsHtml() {
     .card::after {
       content: "";
       position: absolute;
-      width: 190px;
-      height: 70px;
-      left: -58px;
-      top: -50px;
-      background: rgba(255,255,255,0.11);
-      filter: blur(32px);
+      width: 210px;
+      height: 80px;
+      left: -62px;
+      top: -54px;
+      background: rgba(255,255,255,0.12);
+      filter: blur(34px);
       pointer-events: none;
     }
 
     .iconBox {
       position: relative;
-      width: 50px;
-      height: 50px;
-      flex: 0 0 50px;
-      border-radius: 17px;
+      width: 54px;
+      height: 54px;
+      flex: 0 0 54px;
+      border-radius: 18px;
       display: grid;
       place-items: center;
       background:
-        radial-gradient(circle at 45% 28%, rgba(255, 220, 86, 0.34), transparent 45%),
-        linear-gradient(145deg, rgba(255,255,255,0.09), rgba(0,0,0,0.24));
-      border: 1px solid rgba(255, 210, 70, 0.28);
+        radial-gradient(circle at 45% 28%, rgba(255, 220, 86, 0.36), transparent 45%),
+        linear-gradient(145deg, rgba(255,255,255,0.1), rgba(0,0,0,0.25));
+      border: 1px solid rgba(255, 210, 70, 0.3);
       box-shadow:
-        0 8px 20px rgba(0,0,0,0.36),
-        0 0 22px rgba(255,190,40,0.16),
-        inset 0 1px 0 rgba(255,255,255,0.17);
+        0 9px 22px rgba(0,0,0,0.38),
+        0 0 24px rgba(255,190,40,0.17),
+        inset 0 1px 0 rgba(255,255,255,0.18);
       z-index: 2;
     }
 
     .icon {
-      font-size: 30px;
+      font-size: 32px;
       transform: translateY(-1px);
       filter:
         drop-shadow(0 4px 8px rgba(0,0,0,0.42))
-        drop-shadow(0 0 8px rgba(255,190,42,0.35));
+        drop-shadow(0 0 9px rgba(255,190,42,0.36));
     }
 
     .main {
       min-width: 0;
-      width: 300px;
+      width: 325px;
       z-index: 2;
     }
 
     .title {
-      font-size: 21px;
+      font-size: 22px;
       font-weight: 850;
-      letter-spacing: -0.3px;
+      letter-spacing: -0.35px;
       line-height: 1.05;
       color: var(--text);
       text-shadow: 0 2px 10px rgba(0,0,0,0.62);
@@ -509,12 +512,12 @@ function obsHtml() {
     }
 
     .sub {
-      margin-top: 5px;
+      margin-top: 6px;
       display: flex;
       align-items: center;
       gap: 7px;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 750;
       line-height: 1;
     }
@@ -529,7 +532,7 @@ function obsHtml() {
 
     .divider {
       width: 1px;
-      height: 48px;
+      height: 52px;
       flex: 0 0 1px;
       background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.18), transparent);
       z-index: 2;
@@ -538,20 +541,20 @@ function obsHtml() {
     .stat {
       display: flex;
       align-items: center;
-      gap: 9px;
-      padding: 8px 12px 8px 10px;
-      border-radius: 17px;
-      background: linear-gradient(145deg, rgba(0,0,0,0.18), rgba(255,255,255,0.055));
-      border: 1px solid rgba(255,255,255,0.08);
+      gap: 10px;
+      padding: 9px 13px 9px 11px;
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(0,0,0,0.19), rgba(255,255,255,0.06));
+      border: 1px solid rgba(255,255,255,0.085);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-      min-width: 122px;
+      min-width: 134px;
       justify-content: flex-end;
       z-index: 2;
     }
 
     .miniLike {
-      font-size: 24px;
-      filter: drop-shadow(0 0 9px rgba(255,196,47,0.35));
+      font-size: 26px;
+      filter: drop-shadow(0 0 10px rgba(255,196,47,0.38));
     }
 
     .numWrap {
@@ -562,7 +565,7 @@ function obsHtml() {
     }
 
     .likes {
-      font-size: 33px;
+      font-size: 36px;
       font-weight: 950;
       letter-spacing: -1px;
       color: #ffffff;
@@ -574,7 +577,7 @@ function obsHtml() {
     .label {
       margin-top: 4px;
       color: rgba(245,247,251,0.55);
-      font-size: 10.5px;
+      font-size: 11px;
       font-weight: 800;
       white-space: nowrap;
     }
@@ -585,8 +588,8 @@ function obsHtml() {
       opacity: 0;
       pointer-events: none;
       background:
-        radial-gradient(circle at 80% 50%, rgba(255,204,67,0.28), transparent 34%),
-        linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.18) 45%, transparent 62%);
+        radial-gradient(circle at 80% 50%, rgba(255,204,67,0.3), transparent 34%),
+        linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.19) 45%, transparent 62%);
       z-index: 1;
     }
 
@@ -624,7 +627,7 @@ function obsHtml() {
     @keyframes promptInOut {
       0% {
         opacity: 0;
-        transform: translateY(14px) scale(0.96);
+        transform: translateY(18px) scale(0.96);
       }
       13% {
         opacity: 1;
@@ -636,18 +639,18 @@ function obsHtml() {
       }
       100% {
         opacity: 0;
-        transform: translateY(12px) scale(0.97);
+        transform: translateY(14px) scale(0.97);
       }
     }
 
     @keyframes arrowBlink {
       0%, 100% {
-        opacity: 0.36;
+        opacity: 0.34;
         transform: translateY(-2px);
       }
       50% {
         opacity: 1;
-        transform: translateY(8px);
+        transform: translateY(9px);
       }
     }
 
@@ -679,7 +682,7 @@ function obsHtml() {
       35% {
         box-shadow:
           inset 0 1px 0 rgba(255,255,255,0.12),
-          0 0 35px rgba(255,204,61,0.34);
+          0 0 38px rgba(255,204,61,0.38);
       }
       100% {
         box-shadow:
@@ -815,8 +818,7 @@ function obsHtml() {
           maxLife: 1.25,
           size: size,
           color: colors[Math.floor(Math.random() * colors.length)],
-          gravity: rand(0.028, 0.055),
-          spin: rand(-0.15, 0.15)
+          gravity: rand(0.028, 0.055)
         });
       }
     }
@@ -832,8 +834,7 @@ function obsHtml() {
           maxLife: 1.15,
           size: rand(1.6, 3.8),
           color: Math.random() > 0.5 ? "#ffcc3d" : "#ffffff",
-          gravity: rand(0.04, 0.07),
-          spin: rand(-0.15, 0.15)
+          gravity: rand(0.04, 0.07)
         });
       }
     }
@@ -847,10 +848,10 @@ function obsHtml() {
       const cx = statRect.left + statRect.width * 0.5;
       const cy = statRect.top + statRect.height * 0.5;
 
-      createBurst(cx, cy, 52, 5.6);
-      createBurst(cardRect.left + 70, cardRect.top + 14, 30, 4.4);
-      createBurst(cardRect.right - 42, cardRect.top + 8, 34, 4.7);
-      createSparkRain(cx, cy - 18, 36);
+      createBurst(cx, cy, 58, 5.8);
+      createBurst(cardRect.left + 80, cardRect.top + 12, 34, 4.6);
+      createBurst(cardRect.right - 44, cardRect.top + 8, 38, 4.9);
+      createSparkRain(cx, cy - 22, 42);
 
       if (!fireworkRunning) {
         fireworkRunning = true;
@@ -885,7 +886,7 @@ function obsHtml() {
         ctx.globalAlpha = alpha;
         ctx.fillStyle = p.color;
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 13;
+        ctx.shadowBlur = 14;
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
