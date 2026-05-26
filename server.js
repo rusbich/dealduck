@@ -515,9 +515,9 @@ function obsHtml() {
     }
 
     .main {
-      min-width: 0;
-      width: 360px;
-      z-index: 2;
+    min-width: 0;
+   flex: 1 1 auto;
+    z-index: 2;
     }
 
     .title {
@@ -559,41 +559,45 @@ function obsHtml() {
       z-index: 2;
     }
 
-    .stat {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 12px 17px 12px 15px;
-      border-radius: 23px;
-      background:
-        radial-gradient(circle at 25% 15%, rgba(255,204,61,0.10), transparent 38%),
-        linear-gradient(145deg, rgba(0,0,0,0.21), rgba(255,255,255,0.065));
-      border: 1px solid rgba(255,255,255,0.095);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.09),
-        0 0 0 rgba(255,204,61,0);
-      min-width: 220px;
-      justify-content: center;
-      z-index: 2;
-    }
+   .stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 13px 10px 12px;
+  border-radius: 21px;
+  background:
+    radial-gradient(circle at 25% 15%, rgba(255,204,61,0.12), transparent 38%),
+    linear-gradient(145deg, rgba(0,0,0,0.22), rgba(255,255,255,0.07));
+  border: 1px solid rgba(255,255,255,0.095);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.09),
+    0 0 0 rgba(255,204,61,0);
+  min-width: 0;
+  width: auto;
+  flex: 0 0 auto;
+  justify-content: center;
+  z-index: 2;
+  }
 
     .miniLike {
-      font-size: 34px;
-      line-height: 1;
-      filter: drop-shadow(0 0 11px rgba(255,196,47,0.42));
-      transform: translateY(1px);
-    }
+  font-size: 50px;
+  line-height: 1;
+  filter:
+    drop-shadow(0 4px 8px rgba(0,0,0,0.45))
+    drop-shadow(0 0 14px rgba(255,196,47,0.48));
+  transform: translateY(1px);
+  }
 
     .likes {
-      font-size: 72px;
-      line-height: 0.95;
-      font-weight: 1000;
-      letter-spacing: -2.5px;
-      color: #ffffff;
-      text-shadow:
-        0 3px 0 rgba(0,0,0,0.36),
-        0 7px 20px rgba(0,0,0,0.68);
-    }
+  font-size: 72px;
+  line-height: 0.9;
+  font-weight: 1000;
+  letter-spacing: -2.5px;
+  color: #ffffff;
+  text-shadow:
+    0 3px 0 rgba(0,0,0,0.36),
+    0 7px 20px rgba(0,0,0,0.68);
+}
 
     .shine {
       position: absolute;
